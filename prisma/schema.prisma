@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  role      String   // "Admin" or "Staff"
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Patient {
+  id         String   @id // Using String because the code supports custom IDs
+  name       String
+  department String   @default("-")
+  age        Int      @default(0)
+  gender     String   @default("Laki-laki")
+  address    String   @default("-")
+  phone      String   @default("-")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  diagnoses  Diagnosis[]
+}
+
+model Symptom {
+  id        String   @id // G01, G02, etc.
+  name      String
+  type      String   @default("Gejala Tambahan")
+  cfPakar   Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Disease {
+  id           String   @id // P01, P02, etc.
+  name         String
+  description  String   @db.Text
+  solusiRendah String   @db.Text
+  solusiRingan String   @db.Text
+  solusiTinggi String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Rule {
+  id              Int      @id @default(autoincrement())
+  disease         String
+  diseaseSeverity String   @default("sedang")
+  conditions      Json     // Array of { symptomId: string, operator: string, severity: string }
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Diagnosis {
+  id           Int      @id @default(autoincrement())
+  date         String
+  patientName  String
+  patient      Patient? @relation(fields: [patientId], references: [id])
+  patientId    String?
+  result       String
+  severity     String   @default("sedang")
+  score        Float
+  hybridResult Float
+  solution     String   @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
